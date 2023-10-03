@@ -17,7 +17,7 @@ function createFeatures(earthquakeData) {
   });
 
    // Create the base layers.
-   let street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(myMap);
 
@@ -32,7 +32,7 @@ function size(magnitude){
     }
 }
 
-function color (depth) {
+function color(depth) {
     if (depth >= 90) {
         return "#800026"
     }
@@ -48,13 +48,16 @@ function color (depth) {
     else if (depth >= 10){
         return "#fecc76"
     }
-    else {
+    else if (depth >= -10){
         return "#f7fe76"
     }
+    else return "#fffdd0"
+  
+    
 }
 
 
-
+// use GeoJSON function, pointToLayer to create circule markers with cusotmized sizes based on maginitude and customized color based on depth
   L.geoJSON(earthquakeData, {
     
     pointToLayer: function (feature,latlng){
@@ -72,5 +75,26 @@ function color (depth) {
         layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p>${new Date(feature.properties.time)}</p><hr><p>Magnitude:${feature.properties.mag}</p>`);
       }
   }).addTo(myMap)
+
+  // Set up legend on the map
+  var legend = L.control({position: 'bottomright'});
+
+  legend.onAdd = function (myMap) {
+  
+      var div = L.DomUtil.create('div', 'info legend'),
+          depth = [90, 70, 50, 30, 10, -10],
+          labels = [];
+  
+      // loop through our density intervals and generate a label with a colored square for each interval
+      for (var i = 0; i < depth.length; i++) {
+          div.innerHTML +=
+              '<i style="background:' + color(depth[i] + 1) + '"></i> ' +
+              depth[i] + (depth[i + 1] ? '&ndash;' + depth[i + 1] + '<br>' : '+');
+      }
+  
+      return div;
+  };
+  
+  legend.addTo(myMap);
 
 }
